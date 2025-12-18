@@ -47,12 +47,11 @@ RSpec.describe MermaidErd::Generator do
     end
 
     context "when the config file is missing" do
-      it "raises a meaningful error" do
+      it "falls back to an empty exclusion list" do
         FileUtils.rm_f(config_path)
 
-        expect do
-          generator.generate
-        end.to raise_error(/Missing config file/)
+        expect { generator.generate }.not_to raise_error
+        expect(File.exist?(output_path)).to be(true)
       end
     end
 
