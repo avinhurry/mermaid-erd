@@ -40,10 +40,13 @@ module MermaidErd
         lines << "  }"
 
         model.reflect_on_all_associations(:belongs_to).each do |assoc|
-          next if assoc.polymorphic? || assoc.class_name.nil?
+          next if assoc.polymorphic?
 
-          to = sanitize(assoc.class_name)
-          next if excluded?(assoc.class_name)
+          klass_name = assoc.class_name.to_s.strip
+          next if klass_name.empty?
+
+          to = sanitize(klass_name)
+          next if excluded?(klass_name)
 
           lines << "  #{sanitized_name} }o--|| #{to} : belongs_to"
         end

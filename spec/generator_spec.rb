@@ -72,6 +72,35 @@ RSpec.describe MermaidErd::Generator do
       end
     end
 
+    context "when the model has a belongs_to without a class name" do
+      before do
+        ActiveRecord::Base.connection.create_table(:no_class_models, force: true) do |t|
+          t.bigint :foo_id
+        end
+
+        stub_const("NoClassModel", Class.new(ApplicationRecord) do
+          self.table_name = "no_class_models"
+          belongs_to :foo, class_name: "NonexistentModel"
+        end)
+
+        reflection = NoClassModel.reflect_on_all_associations(:belongs_to).first
+        allow(reflection).to receive(:class_name).and_return("")
+        allow(NoClassModel).to receive(:reflect_on_all_associations).with(:belongs_to).and_return([ reflection ])
+      end
+
+      after do
+        ActiveRecord::Base.connection.drop_table(:no_class_models, if_exists: true)
+      end
+
+      it "skips associations without a target class" do
+        generator.generate
+
+        contents = File.read(output_path)
+        expect(contents).to include("NoClassModel {")
+        expect(contents).not_to include("NoClassModel }o--||")
+      end
+    end
+
     context "when the config file is missing" do
       it "falls back to an empty exclusion list" do
         FileUtils.rm_f(config_path)
