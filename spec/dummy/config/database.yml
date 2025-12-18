@@ -1,0 +1,16 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  username: <%= ENV.fetch("PGUSER", "postgres") %>
+  password: <%= ENV.fetch("PGPASSWORD", "") %>
+  host: <%= ENV.fetch("PGHOST", "localhost") %>
+  port: <%= ENV.fetch("PGPORT", 5432) %>
+  pool: 5
+
+development:
+  <<: *default
+  database: mermaid_erd_dummy_dev
+
+test:
+  <<: *default
+  database: mermaid_erd_dummy_test
