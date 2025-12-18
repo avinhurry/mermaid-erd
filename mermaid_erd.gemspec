@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Generate Mermaid ER diagrams for Rails models in Markdown"
   spec.description = "Generate Mermaid ER diagrams from Rails models as Markdown-friendly output"
-  spec.homepage = "https://github.com/avinhurry/mermaid_erd"
+  spec.homepage = "https://github.com/avinhurry/mermaid-erd"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.4.0"
 
