@@ -9,9 +9,11 @@ module MermaidErd
       @config_path = config_path
       @output_path = output_path
       @exclusions = begin
-        YAML.load_file(config_path).fetch("exclude", [])
-      rescue Errno::ENOENT
-        raise "Missing config file at #{config_path}"
+        if File.exist?(config_path)
+          YAML.safe_load_file(config_path, aliases: true) || {}
+        else
+          {}
+        end.fetch("exclude", [])
       rescue Psych::SyntaxError => e
         raise "YAML syntax error in #{config_path}: #{e.message}"
       end
