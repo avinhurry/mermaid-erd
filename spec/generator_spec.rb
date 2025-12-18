@@ -46,6 +46,65 @@ RSpec.describe MermaidErd::Generator do
       end
     end
 
+    context "when only specific models are requested" do
+      before do
+        File.write(config_path, { "exclude" => [], "only" => [ "TestModel" ] }.to_yaml)
+        ActiveRecord::Base.connection.create_table(:users, force: true) { |t| t.string(:name) }
+        ActiveRecord::Base.connection.create_table(:others, force: true) { |t| t.string(:name) }
+
+        define_test_model(model_name: "TestModel", table_name: "users")
+        define_test_model(model_name: "OtherModel", table_name: "others")
+      end
+
+      after do
+        ActiveRecord::Base.connection.drop_table(:users, if_exists: true)
+        ActiveRecord::Base.connection.drop_table(:others, if_exists: true)
+      end
+
+      it "includes only the listed models" do
+        generator.generate
+
+        contents = File.read(output_path)
+        expect(contents).to include("TestModel {")
+        expect(contents).not_to include("OtherModel")
+      end
+    end
+
+
+    context "when multiple only and exclude patterns are provided" do
+      before do
+        File.write(config_path, { "exclude" => [ "ExcludedModel", "Baz*" ], "only" => [ "FooModel", "BarModel", "BazModel" ] }.to_yaml)
+
+        ActiveRecord::Base.connection.create_table(:foo_models, force: true) { |t| t.string(:name) }
+        ActiveRecord::Base.connection.create_table(:bar_models, force: true) { |t| t.string(:name) }
+        ActiveRecord::Base.connection.create_table(:baz_models, force: true) { |t| t.string(:name) }
+        ActiveRecord::Base.connection.create_table(:other_models, force: true) { |t| t.string(:name) }
+
+        define_test_model(model_name: "FooModel", table_name: "foo_models")
+        define_test_model(model_name: "BarModel", table_name: "bar_models")
+        define_test_model(model_name: "BazModel", table_name: "baz_models")
+        define_test_model(model_name: "OtherModel", table_name: "other_models")
+      end
+
+      after do
+        %i[foo_models bar_models baz_models other_models].each do |table|
+          ActiveRecord::Base.connection.drop_table(table, if_exists: true)
+        end
+      end
+
+      it "includes only whitelisted models and still respects exclusions" do
+        generator.generate
+
+        contents = File.read(output_path)
+        expect(contents).to include("FooModel {")
+        expect(contents).to include("BarModel {")
+
+        expect(contents).not_to include("BazModel")
+        expect(contents).not_to include("OtherModel")
+      end
+    end
+
+
     context "when the model has a polymorphic belongs_to" do
       before do
         ActiveRecord::Base.connection.create_table(:polymorphic_models, force: true) do |t|

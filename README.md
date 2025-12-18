@@ -51,6 +51,8 @@ This will output a Mermaid diagram to:
 documentation/domain-model.md
 ```
 
+### Customization
+
 You can customize which models to exclude by creating a file at:
 
 ```yaml
@@ -60,6 +62,16 @@ exclude:
   - ActiveStorage::*
   - SolidQueue::*
   - Blazer::*
+```
+You can limit to specific models:
+
+```yaml
+# config/mermaid_erd.yml
+
+only:
+  - Order
+  - Customer
+  - Product
 ```
 
 ### Post-Migration Reminder

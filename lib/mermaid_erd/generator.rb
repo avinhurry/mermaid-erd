@@ -8,15 +8,9 @@ module MermaidErd
     def initialize(config_path:, output_path:)
       @config_path = config_path
       @output_path = output_path
-      @exclusions = begin
-        if File.exist?(config_path)
-          YAML.safe_load_file(config_path, aliases: true) || {}
-        else
-          {}
-        end.fetch("exclude", [])
-      rescue Psych::SyntaxError => e
-        raise "YAML syntax error in #{config_path}: #{e.message}"
-      end
+      config = load_config(config_path)
+      @exclusions = config.fetch("exclude", [])
+      @inclusions = parse_inclusions(config)
     end
 
     def generate
@@ -67,10 +61,40 @@ module MermaidErd
       @exclusions.any? { |pattern| File.fnmatch(pattern, model_name) }
     end
 
+    def included?(model_name)
+      return true if @inclusions.empty?
+
+      @inclusions.any? { |pattern| File.fnmatch(pattern, model_name) }
+    end
+
     def load_models
       ActiveRecord::Base.descendants.reject do |model|
-        model.abstract_class? || excluded?(model.name) || model.name.start_with?("HABTM_")
+        model.abstract_class? ||
+          excluded?(model.name) ||
+          !included?(model.name) ||
+          model.name.start_with?("HABTM_")
       end
+    end
+
+    def parse_inclusions(config)
+      only = config["only"]
+
+      case only
+      when String
+        only.split(",").map(&:strip).reject(&:empty?)
+      when Array
+        only.map(&:to_s).map(&:strip).reject(&:empty?)
+      else
+        []
+      end
+    end
+
+    def load_config(config_path)
+      return {} unless File.exist?(config_path)
+
+      YAML.safe_load_file(config_path, aliases: true) || {}
+    rescue Psych::SyntaxError => e
+      raise "YAML syntax error in #{config_path}: #{e.message}"
     end
   end
 end
