@@ -19,12 +19,10 @@ Generate Mermaid-compatible Entity Relationship Diagrams (ERDs) from your Rails 
 
 ## Installation
 
-Add this line to your Gemfile:
+Add this line to the development section of your Gemfile:
 
 ```ruby
-group :development do
   gem "mermaid_erd"
-end
 ```
 
 Then install:
