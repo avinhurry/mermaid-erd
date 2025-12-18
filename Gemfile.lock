@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    mermaid_erd (0.1.0)
+    mermaid_erd (0.1.1)
       rails (~> 8.0)
 
 GEM
