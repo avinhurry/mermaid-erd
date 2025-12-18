@@ -18,6 +18,8 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: mermaid_erd_dummy_test
+        ports:
+          - "5432:5432"
         options: >-
           --health-cmd="pg_isready -U postgres"
           --health-interval=10s
@@ -29,7 +31,7 @@ jobs:
           - '3.4.4'
 
     env:
-      PGHOST: postgres
+      PGHOST: 127.0.0.1
       PGUSER: postgres
       PGPASSWORD: postgres
       PGPORT: 5432
