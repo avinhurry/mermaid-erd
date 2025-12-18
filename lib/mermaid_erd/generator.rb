@@ -40,6 +40,8 @@ module MermaidErd
         lines << "  }"
 
         model.reflect_on_all_associations(:belongs_to).each do |assoc|
+          next if assoc.polymorphic? || assoc.class_name.nil?
+
           to = sanitize(assoc.class_name)
           next if excluded?(assoc.class_name)
 

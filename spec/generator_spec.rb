@@ -46,6 +46,32 @@ RSpec.describe MermaidErd::Generator do
       end
     end
 
+    context "when the model has a polymorphic belongs_to" do
+      before do
+        ActiveRecord::Base.connection.create_table(:polymorphic_models, force: true) do |t|
+          t.string :record_type
+          t.bigint :record_id
+        end
+
+        stub_const("PolymorphicModel", Class.new(ApplicationRecord) do
+          self.table_name = "polymorphic_models"
+          belongs_to :record, polymorphic: true
+        end)
+      end
+
+      after do
+        ActiveRecord::Base.connection.drop_table(:polymorphic_models, if_exists: true)
+      end
+
+      it "skips polymorphic associations to avoid blank targets" do
+        generator.generate
+
+        contents = File.read(output_path)
+        expect(contents).to include("PolymorphicModel {")
+        expect(contents).not_to include("PolymorphicModel }o--||")
+      end
+    end
+
     context "when the config file is missing" do
       it "falls back to an empty exclusion list" do
         FileUtils.rm_f(config_path)
