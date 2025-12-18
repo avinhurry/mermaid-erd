@@ -1,0 +1,15 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+/spec/dummy/tmp/
+/spec/dummy/log/*.log
+/spec/dummy/config/master.key
+/spec/dummy/config/credentials.yml.enc
+
+# rspec failure tracking
+.rspec_status
