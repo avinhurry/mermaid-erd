@@ -41,6 +41,7 @@ module MermaidErd
 
           to = sanitize(klass_name)
           next if excluded?(klass_name)
+          next unless included?(klass_name)
 
           lines << "  #{sanitized_name} }o--|| #{to} : belongs_to"
         end

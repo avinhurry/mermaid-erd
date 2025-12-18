@@ -18,7 +18,17 @@ RSpec.describe MermaidErd::Generator do
 
   describe "#generate" do
     context "with a basic model" do
-      before { define_test_model(model_name: "TestModel", table_name: "users") }
+      before do
+        ActiveRecord::Base.connection.create_table(:users, force: true) do |t|
+          t.string :name
+          t.string :emails
+        end
+        define_test_model(model_name: "TestModel", table_name: "users")
+      end
+
+      after do
+        ActiveRecord::Base.connection.drop_table(:users, if_exists: true)
+      end
 
       it "writes a valid Mermaid ERD to the output file" do
         generator.generate
@@ -35,8 +45,16 @@ RSpec.describe MermaidErd::Generator do
 
     context "when the model is excluded in the pattern" do
       before do
+        ActiveRecord::Base.connection.create_table(:users, force: true) do |t|
+          t.string :name
+          t.string :emails
+        end
         File.write(config_path, { "exclude" => %w[TestModel] }.to_yaml)
         define_test_model(model_name: "TestModel", table_name: "users")
+      end
+
+      after do
+        ActiveRecord::Base.connection.drop_table(:users, if_exists: true)
       end
 
       it "omits excluded models from the ERD" do
@@ -101,6 +119,18 @@ RSpec.describe MermaidErd::Generator do
 
         expect(contents).not_to include("BazModel")
         expect(contents).not_to include("OtherModel")
+      end
+
+      it "does not render associations to models outside the inclusion list" do
+        stub_const("FooModel", Class.new(ApplicationRecord) do
+          self.table_name = "foo_models"
+          belongs_to :other_model, class_name: "OtherModel"
+        end)
+
+        generator.generate
+
+        contents = File.read(output_path)
+        expect(contents).not_to include("FooModel }o--|| OtherModel")
       end
     end
 
