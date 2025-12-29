@@ -1,6 +1,16 @@
-# MermaidErd
+# Mermaid ERD
 
-Generate Mermaid-compatible Entity Relationship Diagrams (ERDs) from your Rails models, with support for excluding specific models. Designed for modern Rails apps using Active Record.
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Gem](https://img.shields.io/gem/v/mermaid_erd.svg)
+![Downloads](https://img.shields.io/gem/dt/mermaid_erd.svg)
+
+Generate Mermaid-compatible Entity Relationship Diagrams (ERDs) from your Rails models, with support for excluding specific models. Designed for modern Rails apps that use Active Record.
+
+## Why?
+
+Keeping ER diagrams up to date is usually manual, and they quickly go stale.
+This gem generates a diagram directly from your Rails models, so your
+documentation always reflects the current domain model with almost no effort.
 
 ## Features
 
